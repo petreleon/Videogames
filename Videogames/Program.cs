@@ -1,4 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Videogames.Data;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddDbContext<VideogamesContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("VideogamesContext") ?? throw new InvalidOperationException("Connection string 'VideogamesContext' not found.")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
