@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Videogames.Controllers.Extensions;
 using Videogames.Data;
 using Videogames.Models;
 
@@ -20,10 +21,12 @@ namespace Videogames.Controllers
         }
 
         // GET: Games
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? pageNumber)
         {
-              return _context.Game != null ? 
-                          View(await _context.Game.ToListAsync()) :
+            int pageSize = 10;
+            // instead of those lines of code I want to integrate PaginatedList<Game>
+            return _context.Game != null ? 
+                          View(await PaginatedList<Game>.CreateAsync(_context.Game, pageNumber ?? 1, pageSize)) :
                           Problem("Entity set 'VideogamesContext.Game'  is null.");
         }
 
@@ -66,6 +69,8 @@ namespace Videogames.Controllers
             }
             return View(game);
         }
+
+        
 
         // GET: Games/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -148,6 +153,14 @@ namespace Videogames.Controllers
             var game = await _context.Game.FindAsync(id);
             if (game != null)
             {
+                // delete reviews of game
+                var reviews = _context.Review?.Where(r => r.GameId == id);
+                if (reviews != null){
+                    foreach (var review in reviews)
+                    {
+                        _context.Review?.Remove(review);
+                    }
+                }
                 _context.Game.Remove(game);
             }
             
@@ -155,7 +168,7 @@ namespace Videogames.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        private bool GameExists(int id)
+         private bool GameExists(int id)
         {
           return (_context.Game?.Any(e => e.Id == id)).GetValueOrDefault();
         }

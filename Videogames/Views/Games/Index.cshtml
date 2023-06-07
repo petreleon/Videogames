@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Videogames.Models.Game>
+﻿@model Videogames.Controllers.Extensions.PaginatedList<Videogames.Models.Game>
 
 @{
     ViewData["Title"] = "Index";
@@ -13,19 +13,19 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Title)
+                @Html.DisplayNameFor(model => model.FirstOrDefault().Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Producer)
+                @Html.DisplayNameFor(model => model.FirstOrDefault().Producer)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.ReleaseDate)
+                @Html.DisplayNameFor(model => model.FirstOrDefault().ReleaseDate)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Genre)
+                @Html.DisplayNameFor(model => model.FirstOrDefault().Genre)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Price)
+                @Html.DisplayNameFor(model => model.FirstOrDefault().Price)
             </th>
             <th></th>
         </tr>
@@ -57,3 +57,13 @@
 }
     </tbody>
 </table>
+
+@for (int i = 1; i <= Model.TotalPages; i++)
+{
+    <a asp-action="Index"
+       asp-route-pageNumber="@i"
+       class="btn btn-default @(i == Model.PageIndex ? "disabled" : "")">
+        @i
+    </a>
+}
+

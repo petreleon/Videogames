@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Videogames.Controllers.Extensions;
 using Videogames.Data;
 using Videogames.Models;
 
@@ -30,6 +31,7 @@ namespace Videogames.Controllers
         // GET: Reviews/GetReviewsByGameId/5
         public async Task<IActionResult> GetReviewsByGameId(int? id)
         {
+            ViewBag.GameId = id;
             if (id == null || _context.Review == null)
             {
                 return NotFound();
@@ -43,8 +45,8 @@ namespace Videogames.Controllers
             {
                 return NotFound();
             }
-
-            return View(reviews);
+            var binder = reviews;
+            return View(binder);
         }
 
         // GET: Reviews/Details/5
@@ -100,6 +102,26 @@ namespace Videogames.Controllers
             }
             ViewData["GameId"] = new SelectList(_context.Game, "Id", "Title", review.GameId);
             return View(review); 
+        }
+
+        // POST: Reviews/CreateByGameID/5
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateByGameId(int id, [Bind("Id,GameId,ReviewerName,Comment,Rating,CreatedAt")] Review review)
+        {
+            review.Id = 0;
+            review.GameId = id;
+            review.CreatedAt = DateTime.Now;
+
+            if (ModelState.IsValid)
+            {
+                _context.Add(review);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(GetReviewsByGameId), new { id = review.GameId });
+            }
+            ViewData["GameId"] = new SelectList(_context.Game, "Id", "Title", review.GameId);
+            return View(review);
         }
 
         // GET: Reviews/Edit/5

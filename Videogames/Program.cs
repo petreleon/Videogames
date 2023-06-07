@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using System.Globalization;
 using Videogames.Data;
+using Videogames.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<VideogamesContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("VideogamesContext") ?? throw new InvalidOperationException("Connection string 'VideogamesContext' not found.")));
@@ -18,6 +21,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    SeedData.Initialize(services);
+}
+
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
@@ -27,6 +38,11 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Games}/{action=Index}/{id?}");
+
+// Configure culture settings
+var cultureInfo = new CultureInfo("en-US");
+CultureInfo.DefaultThreadCurrentCulture = cultureInfo;
+CultureInfo.DefaultThreadCurrentUICulture = cultureInfo;
 
 app.Run();
